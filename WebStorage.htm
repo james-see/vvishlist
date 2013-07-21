@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>My Todo With Local Storage</title>
+    <style type="text/css">
+        body
+        {
+            overflow-y: scroll; overflow-x:hidden;
+        }
+        span
+        {
+            font-size: 22px;
+            padding-right: 5px;
+            color: #FFF;
+        }
+        .submitButton
+        {
+            font-size: 20px;
+            height: 55px;
+            vertical-align: top;
+        }
+        .headerDiv
+        {
+            height: auto;            
+            background: #C15D63;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .textBox
+        {
+            border-radius: 5px;
+            border: 2px solid #FFF;
+        }
+        
+        .displayToDo
+        {
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            height: Auto;
+            width: 200px;
+            color: #ffffff;
+            float: left;
+            margin: 10px;
+            padding: 10px;
+        }
+    </style>
+    <script type="text/javascript">
+        var currentFormVisibilityStatus = false;
+        function SaveNotes() {
+            var category = document.getElementById("slSearchCategory").value;
+            var todo = document.getElementById("txtToDo").value;
+
+            if (category == "") {
+                alert("Please select Category.");
+                return;
+            }
+
+            var storage = JSON.parse(localStorage.getItem('ToDoList'));
+            var arrayLength = storage.length;
+
+            storage[arrayLength] = category;
+            storage[arrayLength + 1] = todo;
+            localStorage.setItem('ToDoList', JSON.stringify(storage));
+            category = "";
+            loadNotes();
+            clearNote();
+        }
+
+        function clearNote() {
+            var todo = document.getElementById("txtToDo");
+            todo.value = '';
+        }
+
+        function loadNotes() {
+            var storage = JSON.parse(localStorage.getItem('ToDoList'));
+
+            if (!storage) {
+                storage = [];
+                localStorage.setItem('ToDoList', JSON.stringify(storage));
+            }
+
+            var displayArea = document.getElementById("displayArea");
+            var currentFilter = document.getElementById("slSearchCategory").value;
+            var innerDiv = "";
+            for (var i = storage.length - 1; i >= 0; i = i - 2) {
+                if (currentFilter == storage[i - 1] || currentFilter == "") {
+                    var todoColor = 'AD7460';
+                    switch (storage[i - 1]) {
+                        case 'HR':
+                            todoColor = '90CA77';
+                            break;
+                        case 'Payroll':
+                            todoColor = '81C6DD';
+                            break;
+                        case 'Sales':
+                            todoColor = 'F9D654';
+                            break;
+                        case 'Personal':
+                            todoColor = 'AD7460';
+                            break;
+                        default:
+                            todoColor = 'AD7460';
+                            break;
+                    }
+                    innerDiv += "<div class='displayToDo'  style='background:#" + todoColor + "'><input type='image' src='delete.png' width='15px' height='15px' onclick='removeMe(" + i + ")' /> Category : " + storage[i - 1] + " <hr /> " + storage[i] + "</div>";
+                }
+            }
+
+            if (innerDiv != undefined) {
+                displayArea.innerHTML = innerDiv;
+            }
+            else {
+                displayArea.innerHTML = "";
+            }
+        }
+
+        function removeMe(itemId) {
+            var storage = JSON.parse(localStorage.getItem('ToDoList'));
+            storage.splice(itemId - 1, 2);
+            localStorage.setItem('ToDoList', JSON.stringify(storage));
+            loadNotes();
+        }
+
+
+        onload = function () {
+            loadNotes();
+            ShowHideForm();
+        }
+
+    </script>
+</head>
+<body>
+    <div class="headerDiv">
+        <span>Category :</span>
+        <select id="slSearchCategory" class="textBox" onchange="loadNotes()" style="width: 100px">
+            <option value="" selected="selected">All ToDo</option>
+            <option value="Personal">Personal</option>
+            <option value="HR">HR Query</option>
+            <option value="Payroll">Payroll</option>
+            <option value="Sales">Sales</option>
+        </select>
+        <span style="padding-left: 20px">Todo : </span>
+        <textarea id="txtToDo" class="textBox" rows="2" cols="20" style="width: 300px"></textarea>
+        <input type="button" onclick="SaveNotes()" name="Submit" class="submitButton" title="Submit"
+            value="Add Todo" />
+    </div>
+    <div id="displayArea">
+    </div>
+</body>
+</html>
